@@ -4,7 +4,7 @@ import socket
 import select
 import protocolstream
 import time
-
+import json
 def singleton(cls, *args, **kw):
     instances = {}
     def _singleton():
@@ -67,18 +67,30 @@ class IUSocket():
             print('compressed len %d'%(complen))
             print(len(self.m_strRecvBuf[25:]))
             if self.m_strRecvBuf[0] == 1:
+
                 outbuf = zlib.decompress(self.m_strRecvBuf[25:])
+                buflen = int.from_bytes(outbuf[0:4], 'big')# == originlen == len(outbuf)
+                cmd = int.from_bytes(outbuf[6:10], 'big')
+                print('cmd %d' % cmd)
+                seg = int.from_bytes(outbuf[10:14], 'big')
+                print('seg %d' % seg)
+
                 # print(outbuf)
                 # print(int.from_bytes(outbuf[0:4], 'big'))
                 # print(int.from_bytes(outbuf[4:8], 'big'))
                 # print(int.from_bytes(outbuf[8:12], 'big'))
                 # print(int.from_bytes(outbuf[12:16], 'big'))
-                self.m_strRecvBuf = outbuf[16:]
+                self.m_strRecvBuf = outbuf[15:]
             else:
                 outbuf = self.m_strRecvBuf[25:]
-                self.m_strRecvBuf =  outbuf[16:]
-
-            print(self.m_strRecvBuf)
+                self.m_strRecvBuf =  outbuf[15:]
+            if len(self.m_strRecvBuf):
+                if cmd == 1100:
+                    print(json.loads(self.m_strRecvBuf[:-8].decode('unicode-escape')))
+                    print('from id %d'%int.from_bytes(self.m_strRecvBuf[-8:-4], 'big'))
+                    print('to id %d' % int.from_bytes(self.m_strRecvBuf[-4:], 'big'))
+                else:
+                    print(json.loads(self.m_strRecvBuf.decode('unicode-escape')))
 
     def sendheartbeat(self):
         msg_type_beat=1000
