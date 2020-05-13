@@ -4,8 +4,8 @@ import socket
 
 class IUSocket():
     def __init__(self):
-        self.con = socket.socket()
-        self.server = '101.37.25.166'
+        self.con = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = "101.37.25.166"
         self.port = 20000
     def Send(self,str):
         compressed_data = zlib.compress(str)
@@ -25,9 +25,22 @@ class IUSocket():
         self._send()
 
     def Connect(self):
-        self.con.connect((self.server,self.port))
+        address = (str(self.server), self.port)
+        self.con.connect(address)
+        # print('connection ')
 
     def _send(self):
         ret = self.con.send(self.m_strSendBuf)
-        data = self.con.recv(1024)
-        print('recv:', data.decode())
+        poem=''
+        while True:
+            data = self.con.recv(4)
+            if data:
+            #     self.con.close()
+            #     break
+                poem += data
+                print(poem)
+
+        print('received: ')
+
+        # data = self.con.recv(1024)
+        # print('recv:', data.decode())
