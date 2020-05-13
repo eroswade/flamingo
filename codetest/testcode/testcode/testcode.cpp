@@ -6,6 +6,7 @@
 //typedef unsigned int       uint32_t;
 
 #include<iostream>
+#include "ZlibUtil.h"
 
 using namespace std;
 
@@ -40,13 +41,22 @@ int main()
 	writeStream.WriteCString(szLoginInfo, strlen(szLoginInfo));//
 	writeStream.Flush();
 
+	std::string strDestBuf;
+	if (!ZlibUtil::CompressBuf(outbuf, strDestBuf))
+	{
+		printf("Compress error.");
+		return 0 ;
+	}
+
+	int32_t length = (int32_t)outbuf.length();
 	msg rems;
 	rems.compressflag = 1;
-	rems.compresssize = 91;
-	rems.originsize = 97;
+	rems.compresssize = (int32_t)strDestBuf.length();
+	rems.originsize = length;
 	int nsize  = sizeof(rems);
 	std::string m_strSendBuf;
 	m_strSendBuf.append((const char*)&rems, sizeof(rems));
+	m_strSendBuf.append(strDestBuf);
     return 0;
 }
 

@@ -83,7 +83,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -95,7 +95,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -141,11 +141,39 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\zlib1.2.11\crc32.h" />
+    <ClInclude Include="..\zlib1.2.11\deflate.h" />
+    <ClInclude Include="..\zlib1.2.11\gzguts.h" />
+    <ClInclude Include="..\zlib1.2.11\inffast.h" />
+    <ClInclude Include="..\zlib1.2.11\inffixed.h" />
+    <ClInclude Include="..\zlib1.2.11\inflate.h" />
+    <ClInclude Include="..\zlib1.2.11\inftrees.h" />
+    <ClInclude Include="..\zlib1.2.11\trees.h" />
+    <ClInclude Include="..\zlib1.2.11\zconf.h" />
+    <ClInclude Include="..\zlib1.2.11\zlib.h" />
+    <ClInclude Include="..\zlib1.2.11\zutil.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ZlibUtil.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\zlib1.2.11\adler32.c" />
+    <ClCompile Include="..\zlib1.2.11\compress.c" />
+    <ClCompile Include="..\zlib1.2.11\crc32.c" />
+    <ClCompile Include="..\zlib1.2.11\deflate.c" />
+    <ClCompile Include="..\zlib1.2.11\gzclose.c" />
+    <ClCompile Include="..\zlib1.2.11\gzlib.c" />
+    <ClCompile Include="..\zlib1.2.11\gzread.c" />
+    <ClCompile Include="..\zlib1.2.11\gzwrite.c" />
+    <ClCompile Include="..\zlib1.2.11\infback.c" />
+    <ClCompile Include="..\zlib1.2.11\inffast.c" />
+    <ClCompile Include="..\zlib1.2.11\inflate.c" />
+    <ClCompile Include="..\zlib1.2.11\inftrees.c" />
+    <ClCompile Include="..\zlib1.2.11\trees.c" />
+    <ClCompile Include="..\zlib1.2.11\uncompr.c" />
+    <ClCompile Include="..\zlib1.2.11\zlibdemo.c" />
+    <ClCompile Include="..\zlib1.2.11\zutil.c" />
     <ClCompile Include="protocol.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -154,6 +182,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="testcode.cpp" />
+    <ClCompile Include="ZlibUtil.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,5 +13,5 @@ print(bs.m_data)
 from IUSocket import IUSocket
 
 sock = IUSocket()
-# sock.Connect()
+sock.Connect()
 sock.Send(bs.m_data)

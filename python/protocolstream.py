@@ -26,7 +26,7 @@ def read7BitEncoded(buf):
 
 class BinaryStreamWriter():
     def __init__(self):
-        self.m_data = b'\x00\x00\x00\x00\x00\x00'
+        self.m_data = b'\xcc\xcc\xcc\xcc\xcc\xcc'
         self.cur = 6
     def WriteInt32(self,i):
         # i2 = 999999999
