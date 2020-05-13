@@ -1,6 +1,8 @@
 import protocolstream
 import json
 from IUSocket import IUSocket
+import threading
+import zlib
 
 ## 登录测试
 msg_type_login=1002
@@ -15,14 +17,14 @@ sock = IUSocket()
 sock.Connect()
 sock.Send(bs.m_data)
 
-# ## 心跳测试
-# msg_type_beat=1000
-# # 构造指令
+
+th = threading.Thread(target=sock.RecvThreadProc(), args=())
+
+
+# msg_type_beat = 1000
 # bs = protocolstream.BinaryStreamWriter()
-# bs.SendBufConstruct(msg_type_beat,0,'')
+# bs.SendBufConstruct(msg_type_beat, 1, '')
 # bs.Flush()
-#
-# # socket
+# # b'\x00\x00\x00\x0f\xcc\xcc\x00\x00\x03\xe8\x00\x00\x00\x00\x00'
 # sock = IUSocket()
-# sock.Connect()
 # sock.Send(bs.m_data)

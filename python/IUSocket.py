@@ -1,12 +1,31 @@
 import zlib
 import struct
 import socket
+import select
+import protocolstream
+import time
 
+def singleton(cls, *args, **kw):
+    instances = {}
+    def _singleton():
+        if cls not in instances:
+            instances[cls] = cls(*args, **kw)
+
+        return instances[cls]
+    return _singleton
+
+
+@singleton
 class IUSocket():
     def __init__(self):
         self.con = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.con.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server = "101.37.25.166"
         self.port = 20000
+        self.m_strRecvBuf=b''
+        self.m_nHeartbeatSeq = 0
+        self.m_Lasttime = time.time()
+
     def Send(self,str):
         compressed_data = zlib.compress(str)
         originlen = len(str)
@@ -15,11 +34,10 @@ class IUSocket():
         d = 1
         d = d.to_bytes(1, 'big')
         packed_data = d + originlen.to_bytes(4,'little') + complen.to_bytes(4,'little')
-        # unpacked_data = s.unpack(packed_data)
 
-        # b"\x01a\x00\x00\x00^\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x9cc``H<s\x86\x81\x81\xf9\x15\x03\x10\x04U+\x95\x16\xa7\x16\xe5%\xe6\xa6*Y)(\x19\x1a\x9b\x9a\x9bZZ\x18\x19\x9a\x19+\xe9((\x15$\x16\x17\x97\xe7\x17\xa5\x80\xa4\x8aK\xf3\x8a3\xf2\xcbS\x8b@\x12\xc99\x99\xa9y%%\x95\x05 ]\x86@\x81\xe2\x92\xc4\x92\xd2b\x10\xa7\x16\x00'k\x1c_"
+        # \xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc
+        # \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
         self.m_strSendBuf=packed_data + b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' + compressed_data
-        # print(zlib.decompress(compressed_data))
         self._send()
 
     def Connect(self):
@@ -28,11 +46,56 @@ class IUSocket():
         # print('connection ')
 
     def _send(self):
-        ret = self.con.sendall(self.m_strSendBuf)
-        data = self.con.recv(1024)
+        self.con.send(self.m_strSendBuf)
 
-        print('received: ')
-        print(data)
+    def checkreceived(self):
+        read_sockets, write_sockets, error_sockets = select.select([self.con], [], [],1)
+        for sock in read_sockets:
+            # incoming message from remote server
+            if sock == self.con:
+                return True
+            else:
+                return False
+        return False
 
-        # data = self.con.recv(1024)
-        # print('recv:', data.decode())
+    def Recv(self):
+        self.m_strRecvBuf = self.con.recv(10 * 1024)
+        if self.m_strRecvBuf:
+            originlen = int.from_bytes(self.m_strRecvBuf[1:5], 'little')
+            print('origin len %d'%(originlen))
+            complen = int.from_bytes(self.m_strRecvBuf[5:9], 'little')
+            print('compressed len %d'%(complen))
+            print(len(self.m_strRecvBuf[25:]))
+            if self.m_strRecvBuf[0] == 1:
+                outbuf = zlib.decompress(self.m_strRecvBuf[25:])
+                # print(outbuf)
+                # print(int.from_bytes(outbuf[0:4], 'big'))
+                # print(int.from_bytes(outbuf[4:8], 'big'))
+                # print(int.from_bytes(outbuf[8:12], 'big'))
+                # print(int.from_bytes(outbuf[12:16], 'big'))
+                self.m_strRecvBuf = outbuf[16:]
+            else:
+                outbuf = self.m_strRecvBuf[25:]
+                self.m_strRecvBuf =  outbuf[16:]
+
+            print(self.m_strRecvBuf)
+
+    def sendheartbeat(self):
+        msg_type_beat=1000
+        bs = protocolstream.BinaryStreamWriter()
+        bs.SendBufConstruct(msg_type_beat, self.m_nHeartbeatSeq, '')
+        bs.Flush()
+        self.m_nHeartbeatSeq += 1
+        self.Send(bs.m_data)
+
+    def RecvThreadProc(self):
+        while(1):
+            currenttime = time.time()
+            nRet = self.checkreceived()
+            if(nRet):
+                self.m_Lasttime = currenttime
+                self.Recv()
+            else:
+                if currenttime-self.m_Lasttime > 5:
+                    self.m_Lasttime = currenttime
+                    self.sendheartbeat()
