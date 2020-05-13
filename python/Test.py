@@ -1,12 +1,17 @@
 import protocolstream
+import json
 
+## 构造指令
+str = json.dumps({'username':'17357942163','password':'sunshower','clienttype':1,'status':1})
 bs = protocolstream.BinaryStreamWriter()
-bs.WriteInt32(1024)
+bs.SendBufConstruct(1002,0,str)
+
+bs.Flush()
 print(bs.m_data)
 
-bs.ReadInt32(bs.m_data)
+## 发送数据
+from IUSocket import IUSocket
 
-bs.WriteInt32(0)
-print(bs.m_data)
-cde = bs.ReadInt32(bs.m_data[4:8])
-print(cde)
+sock = IUSocket()
+# sock.Connect()
+sock.Send(bs.m_data)
