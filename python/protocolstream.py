@@ -21,8 +21,23 @@ def write7BitEncoded(lenin):
     return buf
 
 def read7BitEncoded(buf):
-    value = buf
-    return value
+    value = 0
+    headlen = 0
+    for i in buf:
+        headlen+=1
+        if i&0x80 == 0x00:
+            break
+
+    deallen = 0
+    bitcount = 0
+    while deallen<headlen:
+        x = buf[deallen]&0x7f
+        x = x<<bitcount
+        value += x
+        deallen += 1
+        bitcount+=7
+
+    return value,headlen
 
 class BinaryStreamWriter():
     def __init__(self):
@@ -71,4 +86,7 @@ class BinaryStreamWriter():
         btarray = bytearray(self.m_data)
         btarray[0:4] = ulen.to_bytes(length=4,byteorder='big')
         self.m_data = bytes(btarray)
+
+    def clear(self):
+        self.m_data = b'\x00\x00\x00\x00\xcc\xcc'
 

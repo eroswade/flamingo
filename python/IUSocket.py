@@ -80,17 +80,19 @@ class IUSocket():
                 # print(int.from_bytes(outbuf[4:8], 'big'))
                 # print(int.from_bytes(outbuf[8:12], 'big'))
                 # print(int.from_bytes(outbuf[12:16], 'big'))
-                self.m_strRecvBuf = outbuf[15:]
+                K = outbuf[14:]
+                value, headlen = protocolstream.read7BitEncoded(K)
+                self.m_strRecvBuf = K[headlen:value+headlen]
             else:
                 outbuf = self.m_strRecvBuf[25:]
                 self.m_strRecvBuf =  outbuf[15:]
             if len(self.m_strRecvBuf):
+                print(json.loads(self.m_strRecvBuf.decode('unicode-escape')))
                 if cmd == 1100:
-                    print(json.loads(self.m_strRecvBuf[:-8].decode('unicode-escape')))
-                    print('from id %d'%int.from_bytes(self.m_strRecvBuf[-8:-4], 'big'))
-                    print('to id %d' % int.from_bytes(self.m_strRecvBuf[-4:], 'big'))
-                else:
-                    print(json.loads(self.m_strRecvBuf.decode('unicode-escape')))
+                    print('from id %d'%int.from_bytes(outbuf[-8:-4], 'big'))
+                    print('to id %d' % int.from_bytes(outbuf[-4:], 'big'))
+                if cmd == 1006:
+                    print('from id %d' % int.from_bytes(outbuf[-4:], 'big'))
 
     def sendheartbeat(self):
         msg_type_beat=1000
@@ -111,3 +113,6 @@ class IUSocket():
                 if currenttime-self.m_Lasttime > 5:
                     self.m_Lasttime = currenttime
                     self.sendheartbeat()
+
+    def closesocket(self):
+        self.con.close()
