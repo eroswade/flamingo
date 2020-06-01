@@ -18,7 +18,7 @@ def on_write(tcp, status):
 
 def on_connection(tcp, status):
     print ("connected")
-    req_message = {'groupid':27361142,'message':'asdflkasdf'}
+    req_message = {'qqid':18467184,'message':'asdflkasdf'}
     sendstr = json.dumps(req_message)
     tcp.write(bytes(sendstr,encoding='utf8'), on_write)
 
