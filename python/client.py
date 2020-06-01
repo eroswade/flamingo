@@ -10,7 +10,7 @@ def on_read(tcp, data,error):
 
         tcp.close(on_close)
     else:
-        print(data)
+        print(data.decode('utf-8'))
 
 def on_write(tcp, status):
     print ("written")
@@ -18,7 +18,7 @@ def on_write(tcp, status):
 
 def on_connection(tcp, status):
     print ("connected")
-    req_message = {'qqid':18467184,'message':'中文测试'}
+    req_message = {'groupid':27361142,'message':'asdflkasdf'}
     sendstr = json.dumps(req_message)
     tcp.write(bytes(sendstr,encoding='utf8'), on_write)
 
