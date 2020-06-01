@@ -1,4 +1,5 @@
 import pyuv
+import json
 
 def on_close(tcp):
     print ("closed")
@@ -6,6 +7,7 @@ def on_close(tcp):
 def on_read(tcp, data,error):
     print ("read")
     if data is None:
+
         tcp.close(on_close)
     else:
         print(data)
@@ -16,11 +18,12 @@ def on_write(tcp, status):
 
 def on_connection(tcp, status):
     print ("connected")
-    req_message = b"GET / HTTP/1.0\r\n\r\n"
-    tcp.write(req_message, on_write)
+    req_message = {'qqid':18467184,'message':'中文测试'}
+    sendstr = json.dumps(req_message)
+    tcp.write(bytes(sendstr,encoding='utf8'), on_write)
 
 def main():
-    server_addr = ("127.0.0.1", 1234)
+    server_addr = ("127.0.0.1", 20005)
     loop = pyuv.Loop.default_loop()
     tcp = pyuv.TCP(loop)
 

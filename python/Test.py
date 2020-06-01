@@ -21,7 +21,7 @@ tr = threading.Thread(target=sock.RecvThreadProc, args=())
 tr.start()
 
 
-toid = 1249
+toid = 268435654
 msgcontext = 'test'
 msg = {'msgType':1,'time':time.time(),'clientType':1,'font':['微软雅黑',12,0,0,0,0],'content''':[{'msgText':msgcontext}]}
 bs.clear()
