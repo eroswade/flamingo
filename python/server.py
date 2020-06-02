@@ -12,6 +12,7 @@ def on_read(client, data, error):
     if data is None:
         client.close()
         clients.remove(client)
+        print('remove one client')
         return
     print(data)
 
