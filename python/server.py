@@ -2,6 +2,10 @@ from __future__ import print_function
 
 import signal
 import pyuv
+from time import strftime, gmtime
+
+def getGmt():
+    return strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 
 
 def on_read(client, data, error):
@@ -10,7 +14,21 @@ def on_read(client, data, error):
         clients.remove(client)
         return
     print(data)
-    client.write(data)
+
+    ## origin demo: echo server
+    # client.write(data)
+
+    ## new demo
+    # HTTP response
+    # 怎么制造HTTP协议回应: https://www.cnblogs.com/an-wen/p/11180076.html
+    respone = 'HTTP/1.1 200 OK\r\n Date:'
+    dt = getGmt()
+    respone = respone + dt + '\r\n'
+    Conttent = 'asdfasdf'
+    respone = respone + 'Content-Length:' + str(len(Conttent)) + '\r\n' + 'Content-Type: text/html \r\n\r\n'
+    respone = respone + Conttent
+
+    client.write(respone.encode())
 
 def on_connection(server, error):
     client = pyuv.TCP(server.loop)
@@ -30,7 +48,7 @@ loop = pyuv.Loop.default_loop()
 clients = []
 
 server = pyuv.TCP(loop)
-server.bind(("0.0.0.0", 1234))
+server.bind(("0.0.0.0", 80))
 server.listen(on_connection)
 
 signal_h = pyuv.Signal(loop)
