@@ -4,6 +4,7 @@ import signal
 import pyuv
 from time import strftime, gmtime
 from threading import Thread
+import SQLMulti
 
 def getGmt():
     return strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
@@ -11,6 +12,7 @@ def getGmt():
 class HttpServer():
     def __init__(self):
         self.clients=[]
+        self.sql = SQLMulti.MultiThreadOK('test.db')
     def on_read(self,client, data, error):
         if data is None:
             client.close()
@@ -44,6 +46,7 @@ class HttpServer():
         [c.close() for c in self.clients]
         self.signal_h.close()
         self.server.close()
+        self.sql.close()
 
     def runhttp(self):# test by requesttest
         print("PyUV version %s" % pyuv.__version__)
@@ -63,6 +66,7 @@ class HttpServer():
 class Server():
     def __init__(self):
         self.clients=[]
+        self.sql = SQLMulti.MultiThreadOK('test.db')
     def on_read(self,client, data, error):
         if data is None:
             client.close()
@@ -84,6 +88,7 @@ class Server():
         [c.close() for c in self.clients]
         self.signal_h.close()
         self.server.close()
+        self.sql.close()
 
     def runserver(self):# test by requesttest
         print("PyUV version %s" % pyuv.__version__)
