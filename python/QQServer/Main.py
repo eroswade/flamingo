@@ -24,7 +24,9 @@ class HttpServer():
         strin = urllib.parse.unquote(data.decode())
         if strin.startswith('Event'):
             parms = urllib.parse.parse_qsl(strin)
-            print(parms)
+            strin = {ip[0]: ip[1] for ip in parms}
+            if strin['Event'] != 'Get':
+                print(strin)
 
         ## origin demo: echo server
         # client.write(data)
