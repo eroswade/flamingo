@@ -98,24 +98,34 @@ class Server():
 
         requestmsg = json.loads(data)
         curid = 0
+        wherestr = ''
         if requestmsg.__contains__('User'):
             # self.rs.delete('ushash')
-            if requestmsg.__contains__('SQLfrom'):
-                curid = int(requestmsg['SQLfrom'])
+            if requestmsg.__contains__('SQLidfrom'):
+                curid = int(requestmsg['SQLidfrom'])
                 self.rs.hset(requestmsg['User'],'id',curid)
             else:
                 if self.rs.exists(requestmsg['User']):
-                    curid = self.rs.hget(requestmsg['User'],'id')
+                    curid = int(self.rs.hget(requestmsg['User'],'id'))
                 else:
                     self.rs.hset(requestmsg['User'],'id',0)
                     curid = 0
+            if requestmsg.__contains__('SQLgroupid'):
+                wherestr = wherestr + ' AND groupid=%s '%(requestmsg['SQLgroupid'])
+            if requestmsg.__contains__('SQLgroupname'):
+                wherestr = wherestr + ' AND groupname="%s" '%(requestmsg['SQLgroupname'])
+            if requestmsg.__contains__('SQLsender'):
+                wherestr = wherestr + ' AND sender=%s ' % (requestmsg['SQLsender'])
+            if requestmsg.__contains__('SQLsendername'):
+                wherestr = wherestr + ' AND sendername="%s" ' % (requestmsg['SQLsendername'])
+            if requestmsg.__contains__('SQLsendtime'):
+                wherestr = wherestr + ' AND sendtime>%s ' % (requestmsg['SQLsendtime'])
 
-
-        sqlresult = self.sql.select("select * from MSG where id>%d"%(int(curid)))
+        sqlresult = self.sql.select("select * from MSG where id>%d"%(int(curid)) + wherestr)
         jsonlist = []
         rowcount = 0
         mxid = curid
-        for id, type, groupid,groupname,sender,sendername,sendtime,message in sqlresult:
+        for id, type, sender,sendername,groupid,groupname,sendtime,message in sqlresult:
             # print(id, type, groupid,groupname,sender,sendername,sendtime,message)
             dic = {'id':id,'type':type,'groupid':groupid,'groupname':groupname,'sender':sender,'sendername':sendername,'sendtime':sendtime,'message':message}
             jsonlist.append(dic)
