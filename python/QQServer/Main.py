@@ -7,6 +7,7 @@ from threading import Thread
 import SQLMulti
 import urllib.parse
 import json
+import redis
 
 def getGmt():
     return strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
@@ -87,23 +88,44 @@ class Server():
     def __init__(self):
         self.clients=[]
         self.sql = SQLMulti.SingleThreadOnly('msg.db')
+        self.rs = redis.Redis(host = '127.0.0.1',port=6379,db=0)
     def on_read(self,client, data, error):
         if data is None:
             client.close()
             self.clients.remove(client)
             print('remove one client')
             return
-        print(data)
+
+        requestmsg = json.loads(data)
+        curid = 0
+        if requestmsg.__contains__('User'):
+            # self.rs.delete('ushash')
+            if requestmsg.__contains__('SQLfrom'):
+                curid = int(requestmsg['SQLfrom'])
+                self.rs.hset(requestmsg['User'],'id',curid)
+            else:
+                if self.rs.exists(requestmsg['User']):
+                    curid = self.rs.hget(requestmsg['User'],'id')
+                else:
+                    self.rs.hset(requestmsg['User'],'id',0)
+                    curid = 0
 
 
-        sqlresult = self.sql.select("select * from MSG")
+        sqlresult = self.sql.select("select * from MSG where id>%d"%(int(curid)))
         jsonlist = []
         rowcount = 0
+        mxid = curid
         for id, type, groupid,groupname,sender,sendername,sendtime,message in sqlresult:
             # print(id, type, groupid,groupname,sender,sendername,sendtime,message)
             dic = {'id':id,'type':type,'groupid':groupid,'groupname':groupname,'sender':sender,'sendername':sendername,'sendtime':sendtime,'message':message}
             jsonlist.append(dic)
             rowcount += 1
+            if id > mxid:
+                mxid = id
+
+        if requestmsg.__contains__('User'):
+            self.rs.hset(requestmsg['User'], 'id', mxid)
+
         outdic = {'row':rowcount,'list':jsonlist}
 
         # origin demo: echo server

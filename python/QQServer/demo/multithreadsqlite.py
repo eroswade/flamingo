@@ -71,7 +71,7 @@ if __name__ == '__main__':
     else:
         sql = SingleThreadOnly(db)
 
-    # sql.execute('CREATE TABLE "MSG" ("id"INTEGER PRIMARY KEY AUTOINCREMENT,	"type"	INTEGER,	"sender"	INTEGER,	"sendername"	TEXT,	"groupid"	INTEGER,	"groupname"	TEXT,	"sendtime"	INTEGER,	"message"	TEXT);')
+    sql.execute('CREATE TABLE "MSG" ("id"INTEGER PRIMARY KEY AUTOINCREMENT,	"type"	INTEGER,	"sender"	INTEGER,	"sendername"	TEXT,	"groupid"	INTEGER,	"groupname"	TEXT,	"sendtime"	INTEGER,	"message"	TEXT);')
     sql.execute('INSERT INTO "main"."MSG"("type","sender","sendername","groupid","groupname","sendtime","message") VALUES (1,1234,"test",12341324,"asdkdsf",123412134,"asdfkasdfk");')
     # sql.execute("insert into people values(?,?)", ('TORVALDS', 'Linus'))
     # for f, n in sql.select("select first, name from people"):
