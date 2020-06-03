@@ -63,7 +63,7 @@ class MultiThreadOK(Thread):
 
 if __name__ == '__main__':
 
-    db = 'people.db'
+    db = 'msg.db'
     multithread = True
 
     if multithread:
@@ -71,9 +71,9 @@ if __name__ == '__main__':
     else:
         sql = SingleThreadOnly(db)
 
-    # sql.execute("create table people(name,first)")
-    sql.execute("insert into people values('VAN ROSSUM','Guido')")
-    sql.execute("insert into people values(?,?)", ('TORVALDS', 'Linus'))
-    for f, n in sql.select("select first, name from people"):
-        print(f, n)
+    # sql.execute('CREATE TABLE "MSG" ("id"INTEGER PRIMARY KEY AUTOINCREMENT,	"type"	INTEGER,	"sender"	INTEGER,	"sendername"	TEXT,	"groupid"	INTEGER,	"groupname"	TEXT,	"sendtime"	INTEGER,	"message"	TEXT);')
+    sql.execute('INSERT INTO "main"."MSG"("type","sender","sendername","groupid","groupname","sendtime","message") VALUES (1,1234,"test",12341324,"asdkdsf",123412134,"asdfkasdfk");')
+    # sql.execute("insert into people values(?,?)", ('TORVALDS', 'Linus'))
+    # for f, n in sql.select("select first, name from people"):
+    #     print(f, n)
     sql.close()

@@ -6,6 +6,7 @@ from time import strftime, gmtime
 from threading import Thread
 import SQLMulti
 import urllib.parse
+import json
 
 def getGmt():
     return strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
@@ -13,20 +14,25 @@ def getGmt():
 class HttpServer():
     def __init__(self):
         self.clients=[]
-        self.sql = SQLMulti.MultiThreadOK('test.db')
+        self.sql = SQLMulti.MultiThreadOK('msg.db')
     def on_read(self,client, data, error):
         if data is None:
             client.close()
             self.clients.remove(client)
-            print('remove one client')
             return
-        print('message coming')
         strin = urllib.parse.unquote(data.decode())
         if strin.startswith('Event'):
             parms = urllib.parse.parse_qsl(strin)
             strin = {ip[0]: ip[1] for ip in parms}
             if strin['Event'] != 'Get':
-                print(strin)
+                if strin['Event'] == 'ClusterIM':
+                    sqlstring = 'INSERT INTO "main"."MSG"("type","sender","sendername","groupid","groupname","sendtime","message") VALUES (1,%s,\"%s\",%s,\"%s\",%s,\"%s\");'%(
+                        strin['Sender'],strin['SenderName'],strin['GroupId'],strin['GroupName'],strin['SendTime'],strin['Message'])
+                elif strin['Event'] == 'NormalIM':
+                    sqlstring = 'INSERT INTO "main"."MSG"("type","sender","sendername","groupid","groupname","sendtime","message") VALUES (2,%s,\"%s\",NULL,NULL,%s,\"%s\");'%(
+                        strin['Sender'], strin['SenderName'],  strin['SendTime'],strin['Message'])
+                self.sql.execute(sqlstring)
+
         # 群消息:
         # {'Event': 'ClusterIM', 'GroupId': '923883633', 'GroupName': '韵达暴风后的祈祷',
         # 'Sender': '2696687334', 'SenderName': '觉觉', 'SendTime': '1591162531',
@@ -80,7 +86,7 @@ class HttpServer():
 class Server():
     def __init__(self):
         self.clients=[]
-        self.sql = SQLMulti.MultiThreadOK('test.db')
+        self.sql = SQLMulti.SingleThreadOnly('msg.db')
     def on_read(self,client, data, error):
         if data is None:
             client.close()
@@ -89,8 +95,19 @@ class Server():
             return
         print(data)
 
-        ## origin demo: echo server
-        client.write(data)
+
+        sqlresult = self.sql.select("select * from MSG")
+        jsonlist = []
+        rowcount = 0
+        for id, type, groupid,groupname,sender,sendername,sendtime,message in sqlresult:
+            # print(id, type, groupid,groupname,sender,sendername,sendtime,message)
+            dic = {'id':id,'type':type,'groupid':groupid,'groupname':groupname,'sender':sender,'sendername':sendername,'sendtime':sendtime,'message':message}
+            jsonlist.append(dic)
+            rowcount += 1
+        outdic = {'row':rowcount,'list':jsonlist}
+
+        # origin demo: echo server
+        client.write(json.dumps(outdic).encode())
 
     def on_connection(self,server, error):
         client = pyuv.TCP(server.loop)
@@ -110,7 +127,7 @@ class Server():
         self.loop = pyuv.Loop.default_loop()
 
         self.server = pyuv.TCP(self.loop)
-        self.server.bind(("0.0.0.0", 20005))
+        self.server.bind(("0.0.0.0", 20006))
         self.server.listen(self.on_connection)
 
         self.signal_h = pyuv.Signal(self.loop)
