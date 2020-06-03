@@ -27,6 +27,13 @@ class HttpServer():
             strin = {ip[0]: ip[1] for ip in parms}
             if strin['Event'] != 'Get':
                 print(strin)
+        # 群消息:
+        # {'Event': 'ClusterIM', 'GroupId': '923883633', 'GroupName': '韵达暴风后的祈祷',
+        # 'Sender': '2696687334', 'SenderName': '觉觉', 'SendTime': '1591162531',
+        # 'Message': '4305931900659 == == 派件网点在哪里客户想要自取了', 'RobotQQ': '2130271802'}
+        # 私聊消息：
+        # {'Event': 'NormalIM', 'Sender': '18467184', 'SenderName': 'Eros.Wade',
+        # 'SendTime': '1591162451', 'Message': 'asdf', 'RobotQQ': '2130271802'}
 
         ## origin demo: echo server
         # client.write(data)
