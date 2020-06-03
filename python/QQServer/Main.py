@@ -5,6 +5,7 @@ import pyuv
 from time import strftime, gmtime
 from threading import Thread
 import SQLMulti
+import urllib.parse
 
 def getGmt():
     return strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
@@ -19,7 +20,11 @@ class HttpServer():
             self.clients.remove(client)
             print('remove one client')
             return
-        print(data)
+        print('message coming')
+        strin = urllib.parse.unquote(data.decode())
+        if strin.startswith('Event'):
+            parms = urllib.parse.parse_qsl(strin)
+            print(parms)
 
         ## origin demo: echo server
         # client.write(data)
@@ -30,7 +35,7 @@ class HttpServer():
         respone = 'HTTP/1.1 200 OK\r\n Date:'
         dt = getGmt()
         respone = respone + dt + '\r\n'
-        Conttent = 'asdfasdf'
+        Conttent = ''
         respone = respone + 'Content-Length:' + str(len(Conttent)) + '\r\n' + 'Content-Type: text/html \r\n\r\n'
         respone = respone + Conttent
 
